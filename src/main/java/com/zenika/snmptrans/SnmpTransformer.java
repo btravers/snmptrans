@@ -1,32 +1,40 @@
 package com.zenika.snmptrans;
 
 import com.zenika.snmptrans.exception.LifecycleException;
-import com.zenika.snmptrans.model.Server;
+import com.zenika.snmptrans.model.SnmpProcess;
 import com.zenika.snmptrans.service.SnmpProcessLoader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 
 import java.util.Collection;
 import java.util.Collections;
 
-@Component
-public class SnmpTransformer {
+
+@SpringBootApplication
+public class SnmpTransformer implements CommandLineRunner {
 
     private Thread shutdownHook = new ShutdownHook();
     private volatile boolean isRunning = false;
 
-    private Collection<Server> servers =  Collections.EMPTY_LIST;
+    private Collection<SnmpProcess> snmpProcesses =  Collections.EMPTY_LIST;
 
     @Autowired
     private SnmpProcessLoader snmpProcessLoader;
 
-    public void mainTask() throws LifecycleException {
+    public static void main(String[] args) {
+        ApplicationContext applicationContext = SpringApplication.run(AppConfig.class, args);
+    }
 
+    @Override
+    public void run(String... strings) throws Exception {
         this.start();
 
         while (true) {
 
-            if (snmpProcessLoader.haveChanged()) {
+            if (this.snmpProcessLoader.haveChanged()) {
                 this.deleteAllJobs();
                 this.startupSystem();
             }
@@ -66,12 +74,22 @@ public class SnmpTransformer {
     }
 
     private synchronized void stopServices() {
-        this.servers = Collections.EMPTY_LIST;
+        this.snmpProcesses = Collections.EMPTY_LIST;
     }
 
-
-
     private void startupSystem() {
+        this.snmpProcesses = this.snmpProcessLoader.getSnmpProcesses();
+
+        this.processSnmpProcessesIntoJobs();
+    }
+
+    private void processSnmpProcessesIntoJobs() {
+        for (SnmpProcess snmpProcess : this.snmpProcesses) {
+            this.scheduleJob(snmpProcess);
+        }
+    }
+
+    private void scheduleJob(SnmpProcess snmpProcess) {
         // TODO
     }
 

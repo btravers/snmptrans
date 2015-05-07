@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Server {
     private String host;
-    private String port;
+    private Integer port;
     private List<Query> queries;
 
     public String getHost() {
@@ -15,11 +15,11 @@ public class Server {
         this.host = host;
     }
 
-    public String getPort() {
+    public Integer getPort() {
         return port;
     }
 
-    public void setPort(String port) {
+    public void setPort(Integer port) {
         this.port = port;
     }
 

@@ -15,12 +15,12 @@ public class SnmpProcessLoaderImpl implements SnmpProcessLoader {
 
     @Override
     public Collection<SnmpProcess> getSnmpProcesses() {
-        return this.getSnmpProcesses();
+        return this.snmpProcessRepository.getAll();
     }
 
     @Override
     public boolean haveChanged() {
-        return this.haveChanged();
+        return this.snmpProcessRepository.haveChanged();
     }
 
 }
