@@ -38,7 +38,7 @@ public class SnmpProcessJob extends QuartzJobBean {
 
         Collection<String> oids = Collections.emptyList();
         for (Query query : snmpProcess.getServer().getQueries()) {
-            oids.addAll(query.getOids());
+            oids.add(query.getOid());
         }
 
         Collection<Result> results = null;

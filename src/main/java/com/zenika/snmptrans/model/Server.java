@@ -3,9 +3,18 @@ package com.zenika.snmptrans.model;
 import java.util.List;
 
 public class Server {
+    private String description;
     private String host;
     private Integer port;
     private List<Query> queries;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getHost() {
         return host;

@@ -1,24 +1,31 @@
 package com.zenika.snmptrans.model;
 
-import java.util.Collection;
-
 public class Query {
-    private String templateName;
-    private Collection<String> oids;
+    private String description;
+    private String oid;
+    private String template;
 
-    public String getTemplateName() {
-        return templateName;
+    public String getDescription() {
+        return description;
     }
 
-    public void setTemplateName(String templateName) {
-        this.templateName = templateName;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public Collection<String> getOids() {
-        return oids;
+    public String getOid() {
+        return oid;
     }
 
-    public void setOids(Collection<String> oids) {
-        this.oids = oids;
+    public void setOid(String oid) {
+        this.oid = oid;
+    }
+
+    public String getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(String template) {
+        this.template = template;
     }
 }
