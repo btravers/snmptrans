@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ConnectionsConfig.class, UtilsConfig.class })
+@Import({ConnectionsConfig.class, UtilsConfig.class, SchedulerConfig.class })
 @ComponentScan({"com.zenika.snmptrans.service", "com.zenika.snmptrans.repository"})
 public class AppConfig {
 

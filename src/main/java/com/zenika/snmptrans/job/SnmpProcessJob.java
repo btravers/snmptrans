@@ -8,7 +8,6 @@ import com.zenika.snmptrans.snmp.SnmpClient;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
@@ -19,16 +18,9 @@ import java.util.Collections;
 @Component
 public class SnmpProcessJob extends QuartzJobBean {
 
-    private int timeout;
-
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
-    }
-
-    @Override
     public void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        JobDataMap map = context.getMergedJobDataMap();
-        SnmpProcess snmpProcess = (SnmpProcess) map.get(SnmpProcess.class.getName());
+        JobDataMap jobDataMap = context.getMergedJobDataMap();
+        SnmpProcess snmpProcess = (SnmpProcess) jobDataMap.get(SnmpProcess.class.getName());
 
         SnmpClient snmpClient = snmpProcess.getSnmpClient();
         if (snmpClient == null) {

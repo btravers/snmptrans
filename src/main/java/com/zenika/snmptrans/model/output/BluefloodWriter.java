@@ -63,7 +63,7 @@ public class BluefloodWriter implements OutputWriter {
         for (Result result : results) {
 
 //                    if (NumberUtils.isNumeric(values.getValue())) {
-//                        String name = KeyUtils.getKeyString(server, query, result, values, getTypeNames(), null);
+//                        String name = KeyUtils.getKeyString(server, run, result, values, getTypeNames(), null);
 //                        String value = values.getValue().toString();
 //                        long time = result.getEpoch();
 //
