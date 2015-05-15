@@ -2,6 +2,7 @@ package com.zenika.snmptrans;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -12,11 +13,17 @@ import org.springframework.context.annotation.Import;
 @ComponentScan({"com.zenika.snmptrans.service", "com.zenika.snmptrans.repository"})
 public class AppConfig {
 
-    @Value("${continue.on.json.error:false}")
-    private boolean continueOnJsonError;
+    @Value("${run.period:60}")
+    private int runPeriod;
 
-    @Value("${run.endlessly:false}")
-    private boolean runEndlessly;
+    @Bean
+    public static PropertyPlaceholderConfigurer configurer() {
+        PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+        ppc.setIgnoreResourceNotFound(true);
+        ppc.setSearchSystemEnvironment(true);
+        ppc.setSystemPropertiesMode(PropertyPlaceholderConfigurer.SYSTEM_PROPERTIES_MODE_OVERRIDE);
+        return ppc;
+    }
 
     @Bean
     public ObjectMapper objectMapper() {

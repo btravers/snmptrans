@@ -2,23 +2,21 @@ package com.zenika.snmptrans.job;
 
 import com.zenika.snmptrans.model.*;
 import com.zenika.snmptrans.snmp.SnmpClient;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.springframework.scheduling.quartz.QuartzJobBean;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
-@Component
-public class SnmpProcessJob extends QuartzJobBean {
+public class SnmpProcessJob implements Runnable {
 
-    public void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        JobDataMap jobDataMap = context.getMergedJobDataMap();
-        SnmpProcess snmpProcess = (SnmpProcess) jobDataMap.get(SnmpProcess.class.getName());
+    private SnmpProcess snmpProcess;
 
+    public SnmpProcessJob(SnmpProcess snmpProcess) {
+        this.snmpProcess = snmpProcess;
+    }
+
+    @Override
+    public void run() {
         SnmpClient snmpClient = snmpProcess.getSnmpClient();
         if (snmpClient == null) {
             snmpClient = new SnmpClient(new StringBuilder()

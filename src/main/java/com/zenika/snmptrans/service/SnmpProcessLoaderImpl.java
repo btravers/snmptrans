@@ -5,6 +5,7 @@ import com.zenika.snmptrans.repository.SnmpProcessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Collection;
 
 @Service
@@ -14,7 +15,7 @@ public class SnmpProcessLoaderImpl implements SnmpProcessLoader {
     private SnmpProcessRepository snmpProcessRepository;
 
     @Override
-    public Collection<SnmpProcess> getSnmpProcesses() {
+    public Collection<SnmpProcess> getSnmpProcesses() throws IOException {
         return this.snmpProcessRepository.getAll();
     }
 
