@@ -1,12 +1,12 @@
 package com.zenika.snmptrans.model;
 
-import java.util.List;
+import java.util.Collection;
 
 public class Server {
     private String description;
     private String host;
     private Integer port;
-    private List<Query> queries;
+    private Collection<QuerySet> querySets;
 
     public String getDescription() {
         return description;
@@ -32,12 +32,12 @@ public class Server {
         this.port = port;
     }
 
-    public List<Query> getQueries() {
-        return queries;
+    public Collection<QuerySet> getQuerySets() {
+        return querySets;
     }
 
-    public void setQueries(List<Query> queries) {
-        this.queries = queries;
+    public void setQuerySets(Collection<QuerySet> querySets) {
+        this.querySets = querySets;
     }
 
 }

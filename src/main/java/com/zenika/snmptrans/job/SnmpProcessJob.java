@@ -1,9 +1,6 @@
 package com.zenika.snmptrans.job;
 
-import com.zenika.snmptrans.model.OutputWriter;
-import com.zenika.snmptrans.model.Query;
-import com.zenika.snmptrans.model.Result;
-import com.zenika.snmptrans.model.SnmpProcess;
+import com.zenika.snmptrans.model.*;
 import com.zenika.snmptrans.snmp.SnmpClient;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -37,8 +34,10 @@ public class SnmpProcessJob extends QuartzJobBean {
         }
 
         Collection<String> oids = Collections.emptyList();
-        for (Query query : snmpProcess.getServer().getQueries()) {
-            oids.add(query.getOid());
+        for (QuerySet querySet : snmpProcess.getServer().getQuerySets()) {
+            for (Query query : querySet.getQueries()) {
+                oids.add(query.getOid());
+            }
         }
 
         Collection<Result> results = null;
