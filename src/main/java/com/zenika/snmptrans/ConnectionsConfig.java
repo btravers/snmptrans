@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class ConnectionsConfig {
 
     @Value("${elasticsearch:}")
-    private String elasticsearch = "";
+    private String elasticsearch;
 
     @Bean
     public HttpClientConnectionManager httpClientConnectionManager() {

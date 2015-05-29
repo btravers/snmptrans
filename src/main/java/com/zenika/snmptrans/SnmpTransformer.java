@@ -3,8 +3,6 @@ package com.zenika.snmptrans;
 import com.zenika.snmptrans.job.SnmpProcessJob;
 import com.zenika.snmptrans.model.SnmpProcess;
 import com.zenika.snmptrans.service.SnmpProcessLoader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -15,22 +13,32 @@ import java.util.Collection;
 import java.util.Collections;
 
 @SpringBootApplication
-public class SnmpTransformer implements CommandLineRunner {
+public class SnmpTransformer {
 
-    private Collection<SnmpProcess> snmpProcesses =  Collections.EMPTY_LIST;
+    private Collection<SnmpProcess> snmpProcesses = Collections.EMPTY_LIST;
 
-    @Autowired
     private SnmpProcessLoader snmpProcessLoader;
 
-    @Autowired
     private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
-    public static void main(String[] args) {
+    public static void main(String... args) {
         ApplicationContext applicationContext = SpringApplication.run(AppConfig.class, args);
+
+        SnmpTransformer snmpTransformer = new SnmpTransformer();
+        snmpTransformer.setSnmpProcessLoader(applicationContext.getBean(SnmpProcessLoader.class));
+        snmpTransformer.setThreadPoolTaskScheduler(applicationContext.getBean(ThreadPoolTaskScheduler.class));
+        snmpTransformer.run();
     }
 
-    @Override
-    public void run(String... strings) throws Exception {
+    public void setSnmpProcessLoader(SnmpProcessLoader snmpProcessLoader) {
+        this.snmpProcessLoader = snmpProcessLoader;
+    }
+
+    public void setThreadPoolTaskScheduler(ThreadPoolTaskScheduler threadPoolTaskScheduler) {
+        this.threadPoolTaskScheduler = threadPoolTaskScheduler;
+    }
+
+    public void run() {
         this.startupSystem();
 
         while (true) {
@@ -55,8 +63,13 @@ public class SnmpTransformer implements CommandLineRunner {
         }
 
         for (SnmpProcess snmpProcess : snmpProcesses) {
-            SnmpProcessJob job = new SnmpProcessJob(snmpProcess);
-            threadPoolTaskScheduler.scheduleAtFixedRate(job, 60000);
+            try(SnmpProcessJob job = new SnmpProcessJob(snmpProcess)) {
+                threadPoolTaskScheduler.scheduleAtFixedRate(job, 60000);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

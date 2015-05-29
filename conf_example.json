@@ -1,0 +1,64 @@
+{
+  "server": {
+    "description": "Ubuntu 14.04LTS",
+    "port": "9991",
+    "host": "192.168.33.10",
+    "querySets": [
+      {
+        "description": "CPU Template",
+        "queries": [
+          {
+            "description": "percentage of user CPU time",
+            "oid": ".1.3.6.1.4.1.2021.11.9.0"
+          },
+          {
+            "description": "raw user cpu time",
+            "oid": ".1.3.6.1.4.1.2021.11.50.0"
+          },
+          {
+            "description": "percentages of system CPU time",
+            "oid": ".1.3.6.1.4.1.2021.11.10.0"
+          },
+          {
+            "description": "raw system cpu time",
+            "oid": ".1.3.6.1.4.1.2021.11.52.0"
+          },
+          {
+            "description": "percentages of idle CPU time",
+            "oid": ".1.3.6.1.4.1.2021.11.11.0"
+          },
+          {
+            "description": "raw idle cpu time",
+            "oid": ".1.3.6.1.4.1.2021.11.53.0"
+          },
+          {
+            "description": "raw nice cpu time",
+            "oid": ".1.3.6.1.4.1.2021.11.51.0"
+          }
+        ]
+      },
+      {
+        "description": "User Defined Queries",
+        "queries": [
+          {
+            "description": "Total Swap Size",
+            "oid": ".1.3.6.1.4.1.2021.4.3.0"
+          },
+          {
+            "description": "Total RAM used",
+            "oid": ".1.3.6.1.4.1.2021.4.6.0"
+          }
+        ]
+      }
+    ]
+  },
+  "writers": [
+    {
+      "@class": "com.zenika.snmptrans.model.output.BluefloodWriter",
+      "settings": {
+        "port": 19000,
+        "host": "192.168.33.12"
+      }
+    }
+  ]
+}
