@@ -39,7 +39,9 @@ public class SnmpClient {
     }
 
     public void stop() throws IOException {
-        this.snmp.close();
+        if (this.snmp != null) {
+            this.snmp.close();
+        }
     }
 
     public void get(List<String> oids, final Server server, final Collection<OutputWriter> writers) throws IOException {
@@ -86,6 +88,12 @@ public class SnmpClient {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                }
+
+                try {
+                    stop();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         };

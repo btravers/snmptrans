@@ -15,17 +15,19 @@ import java.util.Map;
 
 public class BluefloodWriter implements OutputWriter {
 
+    public final static int DEFAULT_TTL = 2592000;
+
     private String host;
     private Integer port;
-    private Long ttl;
+    private Integer ttl;
 
     @Autowired
     private HttpClientConnectionManager httpClientConnectionManager;
 
     @Override
-    public void setSettings(Map<String, Object> settings) throws ValidationException{
-        for (Map.Entry<String, Object> setting: settings.entrySet()) {
-            switch (setting.getKey()){
+    public void setSettings(Map<String, Object> settings) throws ValidationException {
+        for (Map.Entry<String, Object> setting : settings.entrySet()) {
+            switch (setting.getKey()) {
                 case "host":
                     this.host = (String) setting.getValue();
                     break;
@@ -33,11 +35,23 @@ public class BluefloodWriter implements OutputWriter {
                     this.port = (Integer) setting.getValue();
                     break;
                 case "ttl":
-                    this.ttl = (Long) setting.getValue();
+                    this.ttl = (Integer) setting.getValue();
                     break;
                 default:
                     throw new ValidationException(String.format("Unexpected field %s for Blueflood writer", setting.getKey()));
             }
+        }
+
+        if (this.host == null) {
+            throw new ValidationException("Missing host setting");
+        }
+
+        if (this.port == null) {
+            throw new ValidationException("Missing port setting");
+        }
+
+        if (this.ttl == null) {
+            this.ttl = DEFAULT_TTL;
         }
     }
 
@@ -61,19 +75,19 @@ public class BluefloodWriter implements OutputWriter {
         String body = "[";
 
         for (Result result : results) {
+            String name = new StringBuilder()
+                    .append(server.getHost().replace(".", "_"))
+                    .append("_")
+                    .append(server.getPort())
+                    .append(".")
+                    .append(result.getOid().replace(".", "_"))
+                    .toString();
+            long timestamp = result.getTimestamp();
+            Object value = result.getValue();
 
-//                    if (NumberUtils.isNumeric(values.getValue())) {
-//                        String name = KeyUtils.getKeyString(server, run, result, values, getTypeNames(), null);
-//                        String value = values.getValue().toString();
-//                        long time = result.getEpoch();
-//
-//                        String line = "{ \"metricName\": \"" + name + "\", \"metricValue\": " + value + ", \"collectionTime\": " + time
-//                                + ", \"ttlInSeconds\": " + this.ttl + "},";
-//                        body += line;
-//                    } else {
-//
-//                    }
-
+            String line = "{ \"metricName\": \"" + name + "\", \"metricValue\": " + value + ", \"collectionTime\": " + timestamp
+                    + ", \"ttlInSeconds\": " + this.ttl + "},";
+            body += line;
         }
 
         if (body.length() > 1) {
