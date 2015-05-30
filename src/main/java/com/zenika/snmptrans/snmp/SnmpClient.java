@@ -27,15 +27,21 @@ public class SnmpClient {
 
     Snmp snmp = null;
     String address = null;
+    boolean isStarted = false;
 
     public SnmpClient(String address) {
         this.address = address;
+    }
+
+    public boolean isStarted() {
+        return isStarted;
     }
 
     public void start() throws IOException {
         TransportMapping transport = new DefaultUdpTransportMapping();
         this.snmp = new Snmp(transport);
         transport.listen();
+        this.isStarted = true;
     }
 
     public void stop() throws IOException {
@@ -54,6 +60,8 @@ public class SnmpClient {
         ResponseListener listener = new ResponseListener() {
             @Override
             public void onResponse(ResponseEvent event) {
+                ((Snmp) event.getSource()).cancel(event.getRequest(), this);
+
                 if (event == null) {
                     throw new RuntimeException("GET timed out");
                 }
@@ -88,12 +96,6 @@ public class SnmpClient {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
-
-                try {
-                    stop();
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
         };

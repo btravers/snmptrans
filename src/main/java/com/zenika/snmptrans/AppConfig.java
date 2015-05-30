@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Import;
 @ComponentScan({"com.zenika.snmptrans.service", "com.zenika.snmptrans.repository"})
 public class AppConfig {
 
-    @Value("${run.period:60}")
+    @Value("${run.period:60000}")
     private int runPeriod;
 
     @Bean

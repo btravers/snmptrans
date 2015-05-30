@@ -31,7 +31,9 @@ public class SnmpProcessJob implements Runnable, AutoCloseable {
 
         List<Result> results = null;
         try {
-            snmpClient.start();
+            if (!snmpClient.isStarted()) {
+                snmpClient.start();
+            }
             snmpClient.get(oids, snmpProcess.getServer(), snmpProcess.getWriters());
 
         } catch (IOException e) {
