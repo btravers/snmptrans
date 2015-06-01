@@ -46,32 +46,32 @@ public class SnmpProcessRepositoryImpl implements SnmpProcessRepository {
 
     @Override
     public boolean haveChanged() {
-//        SearchResponse response = client.prepareSearch(INDEX).setTypes(TYPE)
-//                .setQuery(QueryBuilders.matchAllQuery())
-//                .addAggregation(AggregationBuilders.terms("agg").field("_timestamp").size(0).order(Terms.Order.term(false)))
-//                .execute().actionGet();
-//
-//        Terms agg = response.getAggregations().get("agg");
-//
-//        if (agg.getBuckets().size() == 0) {
-//            if (this.size == 0) {
-//                return false;
-//            }
-//
-//            this.size = 0;
-//            return true;
-//        }
-//
-//        if (agg.getBuckets().size() != this.size) {
-//            this.size = agg.getBuckets().size();
-//            this.timestamps = Long.parseLong(agg.getBuckets().get(0).getKey());
-//            return true;
-//        }
-//
-//        if (this.timestamps < Long.parseLong(agg.getBuckets().get(0).getKey())) {
-//            this.timestamps = Long.parseLong(agg.getBuckets().get(0).getKey());
-//            return  true;
-//        }
+        SearchResponse response = client.prepareSearch(INDEX).setTypes(TYPE)
+                .setQuery(QueryBuilders.matchAllQuery())
+                .addAggregation(AggregationBuilders.terms("agg").field("_timestamp").size(0).order(Terms.Order.term(false)))
+                .execute().actionGet();
+
+        Terms agg = response.getAggregations().get("agg");
+
+        if (agg.getBuckets().size() == 0) {
+            if (this.size == 0) {
+                return false;
+            }
+
+            this.size = 0;
+            return true;
+        }
+
+        if (agg.getBuckets().size() != this.size) {
+            this.size = agg.getBuckets().size();
+            this.timestamps = Long.parseLong(agg.getBuckets().get(0).getKey());
+            return true;
+        }
+
+        if (this.timestamps < Long.parseLong(agg.getBuckets().get(0).getKey())) {
+            this.timestamps = Long.parseLong(agg.getBuckets().get(0).getKey());
+            return  true;
+        }
 
         return false;
     }

@@ -40,9 +40,11 @@ public class SnmpTransformer {
 
     public void run() {
         this.startupSystem();
+        // Initialize variables
+        this.snmpProcessLoader.haveChanged();
 
         while (true) {
-            if (snmpProcessLoader.haveChanged()) {
+            if (this.snmpProcessLoader.haveChanged()) {
                 deleteAllJobs();
                 startupSystem();
             }
@@ -57,14 +59,14 @@ public class SnmpTransformer {
 
     private void startupSystem() {
         try {
-            this.snmpProcesses = snmpProcessLoader.getSnmpProcesses();
+            this.snmpProcesses = this.snmpProcessLoader.getSnmpProcesses();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        for (SnmpProcess snmpProcess : snmpProcesses) {
+        for (SnmpProcess snmpProcess : this.snmpProcesses) {
             try(SnmpProcessJob job = new SnmpProcessJob(snmpProcess)) {
-                threadPoolTaskScheduler.scheduleAtFixedRate(job, 60000);
+                this.threadPoolTaskScheduler.scheduleAtFixedRate(job, 60000);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (Exception e) {
@@ -74,6 +76,8 @@ public class SnmpTransformer {
     }
 
     private void deleteAllJobs() {
-        threadPoolTaskScheduler.shutdown();
+        if (this.threadPoolTaskScheduler.getThreadGroup() != null) {
+            this.threadPoolTaskScheduler.getThreadGroup().destroy();
+        }
     }
 }
