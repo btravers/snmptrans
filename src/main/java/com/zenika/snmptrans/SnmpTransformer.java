@@ -18,18 +18,25 @@ import java.util.Collections;
 public class SnmpTransformer {
     private static final Logger logger = LoggerFactory.getLogger(SnmpTransformer.class);
 
+    private static final long DEFAULT_PERIOD = 60000;
+
     private Collection<SnmpProcess> snmpProcesses = Collections.EMPTY_LIST;
-
     private SnmpProcessLoader snmpProcessLoader;
-
     private ThreadPoolTaskScheduler threadPoolTaskScheduler;
+    private long period;
 
     public static void main(String... args) {
         ApplicationContext applicationContext = SpringApplication.run(AppConfig.class, args);
 
+        long period = DEFAULT_PERIOD;
+        if (System.getProperty("run.period") != null) {
+            period = Long.parseLong(System.getProperty("run.period"));
+        }
+
         SnmpTransformer snmpTransformer = new SnmpTransformer();
         snmpTransformer.setSnmpProcessLoader(applicationContext.getBean(SnmpProcessLoader.class));
         snmpTransformer.setThreadPoolTaskScheduler(applicationContext.getBean(ThreadPoolTaskScheduler.class));
+        snmpTransformer.setPeriod(period);
         snmpTransformer.run();
     }
 
@@ -39,6 +46,10 @@ public class SnmpTransformer {
 
     public void setThreadPoolTaskScheduler(ThreadPoolTaskScheduler threadPoolTaskScheduler) {
         this.threadPoolTaskScheduler = threadPoolTaskScheduler;
+    }
+
+    public void setPeriod(long period) {
+        this.period = period;
     }
 
     public void run() {
@@ -70,7 +81,7 @@ public class SnmpTransformer {
 
         for (SnmpProcess snmpProcess : this.snmpProcesses) {
             try(SnmpProcessJob job = new SnmpProcessJob(snmpProcess)) {
-                this.threadPoolTaskScheduler.scheduleAtFixedRate(job, 60000);
+                this.threadPoolTaskScheduler.scheduleAtFixedRate(job, this.period);
             } catch (IOException e) {
                 logger.error(e.getMessage());
             } catch (Exception e) {
