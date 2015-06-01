@@ -23,7 +23,7 @@ public class SnmpProcessJob implements Runnable, AutoCloseable {
                 .append(snmpProcess.getServer().getHost()).append("/")
                 .append(snmpProcess.getServer().getPort()).toString();
 
-        switch (this.snmpProcess.getServer().getSnmpVersion()) {
+        switch (this.snmpProcess.getServer().getVersion()) {
             case V1:
                 this.snmpClient = new SnmpV1Client(address,
                         this.snmpProcess.getServer().getCommunity());

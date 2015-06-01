@@ -20,7 +20,7 @@ import java.util.List;
 public abstract class SnmpClient {
 
     Snmp snmp = null;
-    String address = null;
+    String address;
     boolean started = false;
 
     public SnmpClient(String address) {
@@ -75,8 +75,6 @@ public abstract class SnmpClient {
                     Result tmp = new Result();
                     tmp.setOid(((VariableBinding) response).getOid().toString());
                     tmp.setValue(((VariableBinding) response).getVariable().toString());
-
-                    System.out.println(((VariableBinding) response).getVariable().toString());
 
                     result.add(tmp);
                 }

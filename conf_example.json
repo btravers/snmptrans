@@ -1,7 +1,7 @@
 {
   "server": {
     "description": "Ubuntu 14.04LTS",
-    "port": "9991",
+    "port": "161",
     "host": "192.168.33.10",
     "version": "V2c",
     "community": "public"

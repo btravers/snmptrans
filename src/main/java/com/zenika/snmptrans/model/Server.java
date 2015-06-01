@@ -5,7 +5,7 @@ public class Server {
     private String host;
     private Integer port;
 
-    private SnmpVersion snmpVersion;
+    private SnmpVersion version;
 
     // For SNMP V1 and V2c
     private String community;
@@ -46,12 +46,12 @@ public class Server {
         this.port = port;
     }
 
-    public SnmpVersion getSnmpVersion() {
-        return snmpVersion;
+    public SnmpVersion getVersion() {
+        return version;
     }
 
-    public void setSnmpVersion(SnmpVersion snmpVersion) {
-        this.snmpVersion = snmpVersion;
+    public void setVersion(SnmpVersion version) {
+        this.version = version;
     }
 
     public String getCommunity() {
