@@ -6,12 +6,15 @@ import com.zenika.snmptrans.snmp.SnmpClient;
 import com.zenika.snmptrans.snmp.SnmpV1Client;
 import com.zenika.snmptrans.snmp.SnmpV2cClient;
 import com.zenika.snmptrans.snmp.SnmpV3Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SnmpProcessJob implements Runnable, AutoCloseable {
+    private static final Logger logger = LoggerFactory.getLogger(SnmpProcessJob.class);
 
     private SnmpProcess snmpProcess;
     private SnmpClient snmpClient;
@@ -61,7 +64,7 @@ public class SnmpProcessJob implements Runnable, AutoCloseable {
             snmpClient.get(oids, snmpProcess.getServer(), snmpProcess.getWriters());
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 

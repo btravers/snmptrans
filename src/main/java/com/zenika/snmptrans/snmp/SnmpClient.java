@@ -80,11 +80,7 @@ public abstract class SnmpClient {
                 }
 
                 for (OutputWriter writer : writers) {
-                    try {
-                        writer.doWrite(server, result);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    writer.doWrite(server, result);
                 }
             }
         };

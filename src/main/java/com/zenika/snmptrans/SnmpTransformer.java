@@ -3,6 +3,8 @@ package com.zenika.snmptrans;
 import com.zenika.snmptrans.job.SnmpProcessJob;
 import com.zenika.snmptrans.model.SnmpProcess;
 import com.zenika.snmptrans.service.SnmpProcessLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -14,6 +16,7 @@ import java.util.Collections;
 
 @SpringBootApplication
 public class SnmpTransformer {
+    private static final Logger logger = LoggerFactory.getLogger(SnmpTransformer.class);
 
     private Collection<SnmpProcess> snmpProcesses = Collections.EMPTY_LIST;
 
@@ -52,6 +55,7 @@ public class SnmpTransformer {
             try {
                 Thread.sleep(60000);
             } catch (InterruptedException e) {
+                logger.error(e.getMessage());
                 break;
             }
         }
@@ -61,16 +65,16 @@ public class SnmpTransformer {
         try {
             this.snmpProcesses = this.snmpProcessLoader.getSnmpProcesses();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
 
         for (SnmpProcess snmpProcess : this.snmpProcesses) {
             try(SnmpProcessJob job = new SnmpProcessJob(snmpProcess)) {
                 this.threadPoolTaskScheduler.scheduleAtFixedRate(job, 60000);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage());
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error(e.getMessage());
             }
         }
     }

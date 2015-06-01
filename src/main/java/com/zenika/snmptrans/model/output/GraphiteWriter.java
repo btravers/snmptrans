@@ -7,8 +7,9 @@ import com.zenika.snmptrans.model.Server;
 import com.zenika.snmptrans.model.ValidationException;
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
@@ -17,6 +18,7 @@ import java.util.Collection;
 import java.util.Map;
 
 public class GraphiteWriter implements OutputWriter {
+    private static final Logger logger = LoggerFactory.getLogger(GraphiteWriter.class);
 
     private static final String DEFAULT_ROOT_PREFIX = "servers";
 
@@ -61,7 +63,7 @@ public class GraphiteWriter implements OutputWriter {
     }
 
     @Override
-    public void doWrite(Server server, Collection<Result> results) throws IOException {
+    public void doWrite(Server server, Collection<Result> results) {
 
         try(Socket socket = this.genericKeyedObjectPool.borrowObject(address);
             PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), Charsets.UTF_8), true)) {
@@ -86,12 +88,13 @@ public class GraphiteWriter implements OutputWriter {
                         .append("\n")
                         .toString();
                 writer.write(line);
+                logger.info("New entry: " + line);
             }
 
             writer.flush();
             writer.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 }

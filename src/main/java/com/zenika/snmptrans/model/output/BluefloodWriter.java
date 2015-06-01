@@ -8,12 +8,15 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
 public class BluefloodWriter implements OutputWriter {
+    private static final Logger logger = LoggerFactory.getLogger(BluefloodWriter.class);
 
     private final static int DEFAULT_TTL = 2592000;
 
@@ -21,7 +24,8 @@ public class BluefloodWriter implements OutputWriter {
     private Integer port;
     private Integer ttl;
 
-    private HttpClientConnectionManager httpClientConnectionManager = AppContext.getApplicationContext().getBean(HttpClientConnectionManager.class);;
+    private HttpClientConnectionManager httpClientConnectionManager = AppContext.getApplicationContext().getBean(HttpClientConnectionManager.class);
+    ;
 
     @Override
     public void setSettings(Map<String, Object> settings) throws ValidationException {
@@ -55,19 +59,24 @@ public class BluefloodWriter implements OutputWriter {
     }
 
     @Override
-    public void doWrite(Server server, Collection<Result> results) throws IOException {
+    public void doWrite(Server server, Collection<Result> results) {
         String url = "http://" + host + ":" + port + "/v2.0/jmx/ingest";
 
-        HttpClientBuilder httpClientBuilder = HttpClients.custom().setConnectionManager(this.httpClientConnectionManager);
+        try {
+            HttpClientBuilder httpClientBuilder = HttpClients.custom().setConnectionManager(this.httpClientConnectionManager);
 
-        HttpClient httpClient = httpClientBuilder.build();
-        HttpPost request = new HttpPost(url);
+            HttpClient httpClient = httpClientBuilder.build();
+            HttpPost request = new HttpPost(url);
 
-        String body = this.bodyRequest(server, results);
-        StringEntity params = new StringEntity(body);
-        request.addHeader("content-type", "application/x-www-form-urlencoded");
-        request.setEntity(params);
-        httpClient.execute(request);
+            String body = this.bodyRequest(server, results);
+            StringEntity params = new StringEntity(body);
+            request.addHeader("content-type", "application/x-www-form-urlencoded");
+            request.setEntity(params);
+
+            httpClient.execute(request);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
     }
 
     public String bodyRequest(Server server, Collection<Result> results) {
@@ -87,6 +96,8 @@ public class BluefloodWriter implements OutputWriter {
             String line = "{ \"metricName\": \"" + name + "\", \"metricValue\": " + value + ", \"collectionTime\": " + timestamp
                     + ", \"ttlInSeconds\": " + this.ttl + "},";
             body += line;
+
+            logger.info("New entry: " + line);
         }
 
         if (body.length() > 1) {
