@@ -1,5 +1,7 @@
 package com.zenika.snmptrans;
 
+import com.zenika.snmptrans.connection.SocketFactory;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.elasticsearch.client.Client;
@@ -8,6 +10,9 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.net.InetSocketAddress;
+import java.net.Socket;
 
 @Configuration
 public class ConnectionsConfig {
@@ -31,6 +36,18 @@ public class ConnectionsConfig {
         }
 
         return client;
+    }
+
+    @Bean
+    public GenericKeyedObjectPool<InetSocketAddress, Socket> genericKeyedObjectPool() {
+        GenericKeyedObjectPool<InetSocketAddress, Socket> pool = new GenericKeyedObjectPool<>(new SocketFactory());
+        pool.setTestOnBorrow(true);
+        pool.setMaxActive(-1);
+        pool.setMaxIdle(-1);
+        pool.setTimeBetweenEvictionRunsMillis(1000 * 60 * 5);
+        pool.setMinEvictableIdleTimeMillis(1000 * 60 * 5);
+
+        return pool;
     }
 
 }

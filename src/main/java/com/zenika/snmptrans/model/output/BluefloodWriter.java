@@ -1,5 +1,6 @@
 package com.zenika.snmptrans.model.output;
 
+import com.zenika.snmptrans.utils.AppContext;
 import com.zenika.snmptrans.model.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -7,7 +8,6 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -15,14 +15,13 @@ import java.util.Map;
 
 public class BluefloodWriter implements OutputWriter {
 
-    public final static int DEFAULT_TTL = 2592000;
+    private final static int DEFAULT_TTL = 2592000;
 
     private String host;
     private Integer port;
     private Integer ttl;
 
-    @Autowired
-    private HttpClientConnectionManager httpClientConnectionManager;
+    private HttpClientConnectionManager httpClientConnectionManager = AppContext.getApplicationContext().getBean(HttpClientConnectionManager.class);;
 
     @Override
     public void setSettings(Map<String, Object> settings) throws ValidationException {
