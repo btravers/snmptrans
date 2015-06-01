@@ -8,6 +8,7 @@ public class SnmpProcess {
 
     private Collection<OutputWriter> writers;
     private Server server;
+    private Collection<QuerySet> querySets;
 
     public Collection<OutputWriter> getWriters() {
         return writers;
@@ -40,5 +41,13 @@ public class SnmpProcess {
 
     public void setServer(Server server) {
         this.server = server;
+    }
+
+    public Collection<QuerySet> getQuerySets() {
+        return querySets;
+    }
+
+    public void setQuerySets(Collection<QuerySet> querySets) {
+        this.querySets = querySets;
     }
 }

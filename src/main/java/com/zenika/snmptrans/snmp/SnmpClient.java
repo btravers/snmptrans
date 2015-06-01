@@ -3,18 +3,12 @@ package com.zenika.snmptrans.snmp;
 import com.zenika.snmptrans.model.OutputWriter;
 import com.zenika.snmptrans.model.Result;
 import com.zenika.snmptrans.model.Server;
-import org.snmp4j.CommunityTarget;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
-import org.snmp4j.TransportMapping;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.event.ResponseListener;
-import org.snmp4j.mp.SnmpConstants;
-import org.snmp4j.smi.Address;
-import org.snmp4j.smi.GenericAddress;
 import org.snmp4j.smi.OID;
-import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
@@ -23,25 +17,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class SnmpClient {
+public abstract class SnmpClient {
 
     Snmp snmp = null;
     String address = null;
-    boolean isStarted = false;
+    boolean started = false;
 
     public SnmpClient(String address) {
         this.address = address;
     }
 
     public boolean isStarted() {
-        return isStarted;
+        return started;
     }
 
     public void start() throws IOException {
-        TransportMapping transport = new DefaultUdpTransportMapping();
-        this.snmp = new Snmp(transport);
-        transport.listen();
-        this.isStarted = true;
+        this.snmp = new Snmp(new DefaultUdpTransportMapping());
+        this.snmp.listen();
+
+        this.started = true;
     }
 
     public void stop() throws IOException {
@@ -53,18 +47,14 @@ public class SnmpClient {
     public void get(List<String> oids, final Server server, final Collection<OutputWriter> writers) throws IOException {
         List<OID> oidObjects = new ArrayList<>();
         for (String oid : oids) {
-            System.out.println(oid);
             oidObjects.add(new OID(oid));
         }
 
+        // Build the listener
         ResponseListener listener = new ResponseListener() {
             @Override
             public void onResponse(ResponseEvent event) {
                 ((Snmp) event.getSource()).cancel(event.getRequest(), this);
-
-                if (event == null) {
-                    throw new RuntimeException("GET timed out");
-                }
 
                 PDU responsePDU = event.getResponse();
                 if (responsePDU == null) {
@@ -85,7 +75,8 @@ public class SnmpClient {
                     Result tmp = new Result();
                     tmp.setOid(((VariableBinding) response).getOid().toString());
                     tmp.setValue(((VariableBinding) response).getVariable().toString());
-                    System.out.println(tmp.getValue());
+
+                    System.out.println(((VariableBinding) response).getVariable().toString());
 
                     result.add(tmp);
                 }
@@ -100,27 +91,19 @@ public class SnmpClient {
             }
         };
 
-        this.snmp.send(getPDU(oidObjects), getTarget(), null, listener);
-    }
-
-    private PDU getPDU(List<OID> oids) {
+        // Build the request PDU
         PDU pdu = new PDU();
-        for (OID oid : oids) {
+        for (OID oid : oidObjects) {
             pdu.add(new VariableBinding(oid));
         }
-
         pdu.setType(PDU.GET);
-        return pdu;
+
+        // Build the target
+        Target target = this.getTarget();
+
+        // Send the request
+        this.snmp.send(pdu, target, null, listener);
     }
 
-    private Target getTarget() {
-        Address targetAddress = GenericAddress.parse(this.address);
-        CommunityTarget target = new CommunityTarget();
-        target.setCommunity(new OctetString("public"));
-        target.setAddress(targetAddress);
-        target.setRetries(2);
-        target.setTimeout(1500);
-        target.setVersion(SnmpConstants.version2c);
-        return target;
-    }
+    protected abstract Target getTarget();
 }
