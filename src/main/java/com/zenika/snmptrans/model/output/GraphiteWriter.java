@@ -43,7 +43,7 @@ public class GraphiteWriter implements OutputWriter {
                     this.rootPrefix = (String) setting.getValue();
                     break;
                 default:
-                    throw new ValidationException(String.format("Unexpected field %s for Blueflood writer", setting.getKey()));
+                    throw new ValidationException(String.format("Unexpected field %s for Graphite writer", setting.getKey()));
             }
         }
 

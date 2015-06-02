@@ -7,7 +7,9 @@ import java.util.Map;
 public class SnmpProcess {
 
     private Collection<OutputWriter> writers;
+
     private Server server;
+
     private Collection<QuerySet> querySets;
 
     public Collection<OutputWriter> getWriters() {

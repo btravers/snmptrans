@@ -2,7 +2,9 @@ package com.zenika.snmptrans.model;
 
 public class Server {
     private String description;
+
     private String host;
+
     private Integer port;
 
     private SnmpVersion version;

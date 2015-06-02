@@ -2,15 +2,17 @@ package com.zenika.snmptrans.model;
 
 public class Result {
 
-    private long timestamp;
+    private Long timestamp;
+
     private String oid;
+
     private Object value;
 
-    public long getTimestamp() {
+    public Long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
 

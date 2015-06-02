@@ -14,6 +14,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <spring-framework.version>4.1.6.RELEASE</spring-framework.version>
+        <hibernate-validator.version>5.1.2.Final</hibernate-validator.version>
+        <javax-validation.version>1.1.0.Final</javax-validation.version>
         <elasticsearch.version>1.5.0</elasticsearch.version>
         <jackson.version>2.5.2</jackson.version>
         <snmp4j.version>1.10.1</snmp4j.version>
@@ -45,6 +47,7 @@
             <artifactId>jcl-over-slf4j</artifactId>
             <version>${jcloverslf4j.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -76,6 +79,29 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring-framework.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>${mockito.version}</version>
         </dependency>
     </dependencies>
 

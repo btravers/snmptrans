@@ -5,6 +5,7 @@ import java.util.Collection;
 public class QuerySet {
 
     private String description;
+
     private Collection<Query> queries;
 
     public String getDescription() {

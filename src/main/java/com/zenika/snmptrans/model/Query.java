@@ -1,7 +1,9 @@
 package com.zenika.snmptrans.model;
 
 public class Query {
+
     private String description;
+
     private String oid;
 
     public String getDescription() {
