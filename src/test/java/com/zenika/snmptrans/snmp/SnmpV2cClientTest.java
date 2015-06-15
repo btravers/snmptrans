@@ -1,6 +1,7 @@
 package com.zenika.snmptrans.snmp;
 
 import com.zenika.snmptrans.model.Server;
+import org.junit.After;
 import org.junit.Before;
 import org.snmp4j.smi.OID;
 
@@ -25,5 +26,11 @@ public class SnmpV2cClientTest extends SnmpClientTest {
         this.server.setPort(2001);
         this.server.setVersion(Server.SnmpVersion.V1);
         this.server.setCommunity("public");
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        this.agent.stop();
+        this.snmpClient.stop();
     }
 }
