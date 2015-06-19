@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
-public class BluefloodWriter implements OutputWriter {
+public class BluefloodWriter implements Writer {
     private static final Logger logger = LoggerFactory.getLogger(BluefloodWriter.class);
 
     private final static int DEFAULT_TTL = 2592000;
@@ -59,7 +59,7 @@ public class BluefloodWriter implements OutputWriter {
     }
 
     @Override
-    public void doWrite(Server server, Collection<Result> results) {
+    public void doWrite(Map<String, String> results, Map<String, OIDInfo> oidInfo, long timestamp) {
         String url = "http://" + host + ":" + port + "/v2.0/jmx/ingest";
 
         try {
@@ -68,7 +68,33 @@ public class BluefloodWriter implements OutputWriter {
             HttpClient httpClient = httpClientBuilder.build();
             HttpPost request = new HttpPost(url);
 
-            String body = this.bodyRequest(server, results);
+
+            String body = "[";
+
+            for (Map.Entry<String, String> result : results.entrySet()) {
+                OIDInfo info = oidInfo.get(result.getKey());
+
+                String name = new StringBuilder()
+                        .append(info.getAgent())
+                        .append(".")
+                        .append(info.getName())
+                        .append(".")
+                        .append(info.getAttr())
+                        .toString();
+
+                String line = "{ \"metricName\": \"" + name + "\", \"metricValue\": " + result.getValue() + ", \"collectionTime\": " + timestamp / 1000
+                        + ", \"ttlInSeconds\": " + this.ttl + "},";
+                body += line;
+
+                logger.info("New entry: " + line);
+            }
+
+            if (body.length() > 1) {
+                body = body.substring(0, body.length() - 1);
+            }
+            body += "]";
+
+
             StringEntity params = new StringEntity(body);
             request.addHeader("content-type", "application/x-www-form-urlencoded");
             request.setEntity(params);
@@ -77,34 +103,5 @@ public class BluefloodWriter implements OutputWriter {
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
-    }
-
-    public String bodyRequest(Server server, Collection<Result> results) {
-        String body = "[";
-
-        for (Result result : results) {
-            String name = new StringBuilder()
-                    .append(server.getHost().replace(".", "_"))
-                    .append("_")
-                    .append(server.getPort())
-                    .append(".")
-                    .append(result.getOid().replace(".", "_"))
-                    .toString();
-            long timestamp = result.getTimestamp();
-            Object value = result.getValue();
-
-            String line = "{ \"metricName\": \"" + name + "\", \"metricValue\": " + value + ", \"collectionTime\": " + timestamp
-                    + ", \"ttlInSeconds\": " + this.ttl + "},";
-            body += line;
-
-            logger.info("New entry: " + line);
-        }
-
-        if (body.length() > 1) {
-            body = body.substring(0, body.length() - 1);
-        }
-        body += "]";
-
-        return body;
     }
 }

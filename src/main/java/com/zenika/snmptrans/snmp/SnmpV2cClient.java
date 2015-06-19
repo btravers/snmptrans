@@ -21,7 +21,7 @@ public class SnmpV2cClient extends SnmpClient {
         CommunityTarget target = new CommunityTarget();
         target.setCommunity(new OctetString(this.community));
         target.setAddress(targetAddress);
-        target.setTimeout(1500);
+        target.setTimeout(3000);
         target.setRetries(0);
         target.setVersion(SnmpConstants.version2c);
         return target;

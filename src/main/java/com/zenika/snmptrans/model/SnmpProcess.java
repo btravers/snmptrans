@@ -6,13 +6,13 @@ import java.util.Map;
 
 public class SnmpProcess {
 
-    private Collection<OutputWriter> writers;
+    private Collection<Writer> writers;
 
     private Server server;
 
-    private Collection<QuerySet> querySets;
+    private Collection<Query> queries;
 
-    public Collection<OutputWriter> getWriters() {
+    public Collection<Writer> getWriters() {
         return writers;
     }
 
@@ -30,7 +30,7 @@ public class SnmpProcess {
                 throw new ValidationException("Malformed writer exception");
             }
 
-            OutputWriter outputWriter = (OutputWriter) Class.forName(writerClass).newInstance();
+            Writer outputWriter = (Writer) Class.forName(writerClass).newInstance();
             outputWriter.setSettings(settings);
             this.writers.add(outputWriter);
         }
@@ -45,11 +45,11 @@ public class SnmpProcess {
         this.server = server;
     }
 
-    public Collection<QuerySet> getQuerySets() {
-        return querySets;
+    public Collection<Query> getQueries() {
+        return queries;
     }
 
-    public void setQuerySets(Collection<QuerySet> querySets) {
-        this.querySets = querySets;
+    public void setQueries(Collection<Query> queries) {
+        this.queries = queries;
     }
 }

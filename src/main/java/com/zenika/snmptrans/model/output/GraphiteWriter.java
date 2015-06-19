@@ -1,10 +1,7 @@
 package com.zenika.snmptrans.model.output;
 
+import com.zenika.snmptrans.model.*;
 import com.zenika.snmptrans.utils.AppContext;
-import com.zenika.snmptrans.model.OutputWriter;
-import com.zenika.snmptrans.model.Result;
-import com.zenika.snmptrans.model.Server;
-import com.zenika.snmptrans.model.ValidationException;
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
@@ -17,10 +14,10 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.Map;
 
-public class GraphiteWriter implements OutputWriter {
+public class GraphiteWriter implements Writer {
     private static final Logger logger = LoggerFactory.getLogger(GraphiteWriter.class);
 
-    private static final String DEFAULT_ROOT_PREFIX = "servers";
+    private static final String DEFAULT_ROOT_PREFIX = "server";
 
     private InetSocketAddress address;
     private String rootPrefix;
@@ -63,30 +60,31 @@ public class GraphiteWriter implements OutputWriter {
     }
 
     @Override
-    public void doWrite(Server server, Collection<Result> results) {
+    public void doWrite(Map<String, String> results, Map<String, OIDInfo> oidInfo, long timestamp) {
 
-        try(Socket socket = this.genericKeyedObjectPool.borrowObject(address);
-            PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), Charsets.UTF_8), true)) {
+        try (Socket socket = this.genericKeyedObjectPool.borrowObject(address);
+             PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), Charsets.UTF_8), true)) {
 
-            for (Result result : results) {
-                String name = new StringBuilder()
-                        .append(this.rootPrefix)
-                        .append(".")
-                        .append(server.getHost().replace(".", "_"))
-                        .append("_")
-                        .append(server.getPort())
-                        .toString();
-                long timestamp = result.getTimestamp()/1000;
-                Object value = result.getValue();
+            for (Map.Entry<String, String> result : results.entrySet()) {
+                OIDInfo info = oidInfo.get(result.getKey());
 
                 String line = new StringBuilder()
-                        .append(name)
+                        .append(this.rootPrefix)
+                        .append(".")
+                        .append(info.getAgent())
+                        .append(".")
+                        .append(info.getAlias())
+                        .append(".")
+                        .append(info.getName())
+                        .append(".")
+                        .append(info.getAttr())
                         .append(" ")
-                        .append(value)
+                        .append(result.getValue())
                         .append(" ")
-                        .append(timestamp)
+                        .append(timestamp / 1000)
                         .append("\n")
                         .toString();
+
                 writer.write(line);
                 logger.info("New entry: " + line);
             }

@@ -11,20 +11,26 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SnmpProcessJob implements Runnable, AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(SnmpProcessJob.class);
 
     private SnmpProcess snmpProcess;
     private SnmpClient snmpClient;
+    private Map<String, OIDInfo> queries;
 
     public SnmpProcessJob(SnmpProcess snmpProcess) throws IOException, LifecycleException {
         this.snmpProcess = snmpProcess;
+
         String address = new StringBuilder()
                 .append("udp:")
-                .append(snmpProcess.getServer().getHost()).append("/")
-                .append(snmpProcess.getServer().getPort()).toString();
+                .append(this.snmpProcess.getServer().getHost())
+                .append("/")
+                .append(this.snmpProcess.getServer().getPort())
+                .toString();
 
         switch (this.snmpProcess.getServer().getVersion()) {
             case V1:
@@ -46,23 +52,65 @@ public class SnmpProcessJob implements Runnable, AutoCloseable {
                 throw new LifecycleException("Unexpected SNMP version");
         }
 
+        this.queries = new HashMap<>();
+
+        this.snmpClient.start();
+
+        String agent = new StringBuilder()
+                .append(this.snmpProcess.getServer().getHost().replace('.', '_'))
+                .append('_')
+                .append(this.snmpProcess.getServer().getPort())
+                .toString();
+
+        for (Query query : this.snmpProcess.getQueries()) {
+            Map<String, String> names = this.snmpClient.snmpWalk(new StringBuilder()
+                    .append(query.getObj())
+                    .append(".")
+                    .append(query.getTypeName())
+                    .toString());
+
+            for (Map.Entry<String, String> entry : names.entrySet()) {
+                String[] splitted = entry.getKey().split("\\.");
+                String id = splitted[splitted.length - 1];
+
+                for (String attr : query.getAttr()) {
+                    OIDInfo oidInfo = new OIDInfo();
+                    if (query.getResultAlias() == null) {
+                        oidInfo.setAlias(query.getObj());
+                    } else {
+                        oidInfo.setAlias(query.getResultAlias());
+                    }
+                    oidInfo.setName(entry.getValue());
+                    oidInfo.setAttr(attr);
+                    oidInfo.setAgent(agent);
+
+                    this.queries.put(new StringBuilder()
+                            .append(query.getObj())
+                            .append(".")
+                            .append(attr)
+                            .append(".")
+                            .append(id)
+                            .toString(), oidInfo);
+                }
+            }
+        }
+
+        this.snmpClient.stop();
     }
 
     @Override
     public void run() {
-        List<String> oids = new ArrayList<>();
-        for (QuerySet querySet : snmpProcess.getQuerySets()) {
-            for (Query query : querySet.getQueries()) {
-                oids.add(query.getOid());
-            }
-        }
-
         try {
-            if (!snmpClient.isStarted()) {
-                snmpClient.start();
-            }
-            snmpClient.get(oids, snmpProcess.getServer(), snmpProcess.getWriters());
+            this.snmpClient.start();
 
+            List<String> oids = new ArrayList<>();
+            oids.addAll(this.queries.keySet());
+            Map<String, String> results = this.snmpClient.get(oids);
+            this.snmpClient.stop();
+
+            for (Writer writer : this.snmpProcess.getWriters()) {
+                writer.doWrite(results, this.queries, System.currentTimeMillis());
+            }
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
