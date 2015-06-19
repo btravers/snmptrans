@@ -6,11 +6,21 @@ import java.util.Map;
 
 public class SnmpProcess {
 
+    private String id;
+
     private Collection<Writer> writers;
 
     private Server server;
 
     private Collection<Query> queries;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public Collection<Writer> getWriters() {
         return writers;
