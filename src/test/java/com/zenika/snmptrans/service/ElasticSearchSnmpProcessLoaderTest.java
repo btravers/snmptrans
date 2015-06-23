@@ -24,6 +24,7 @@ public class ElasticSearchSnmpProcessLoaderTest extends AbstractSnmpProcessLoade
     public void setUp() {
         try {
             this.client.prepareIndex(SnmpProcessRepositoryImpl.INDEX, SnmpProcessRepositoryImpl.TYPE)
+                    .setRefresh(true)
                     .setSource(IOUtils.toString(getClass().getResourceAsStream("/document1.json")))
                     .execute().actionGet();
         } catch (IOException e) {
@@ -32,13 +33,13 @@ public class ElasticSearchSnmpProcessLoaderTest extends AbstractSnmpProcessLoade
 
         try {
             this.client.prepareIndex(SnmpProcessRepositoryImpl.INDEX, SnmpProcessRepositoryImpl.TYPE)
+                    .setRefresh(true)
                     .setSource(IOUtils.toString(getClass().getResourceAsStream("/document2.json")))
                     .execute().actionGet();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        this.client.admin().indices().flush(new FlushRequest(SnmpProcessRepositoryImpl.INDEX)).actionGet();
         this.snmpProcessLoader.haveChanged();
     }
 
@@ -53,8 +54,8 @@ public class ElasticSearchSnmpProcessLoaderTest extends AbstractSnmpProcessLoade
     @Override
     public void performChanges() throws IOException {
         this.client.prepareIndex(SnmpProcessRepositoryImpl.INDEX, SnmpProcessRepositoryImpl.TYPE)
+                .setRefresh(true)
                 .setSource(IOUtils.toString(getClass().getResourceAsStream("/document3.json")))
                 .execute().actionGet();
-        this.client.admin().indices().flush(new FlushRequest(SnmpProcessRepositoryImpl.INDEX)).actionGet();
     }
 }
