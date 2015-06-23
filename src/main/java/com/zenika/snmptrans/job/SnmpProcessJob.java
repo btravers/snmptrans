@@ -20,7 +20,7 @@ public class SnmpProcessJob implements Runnable, AutoCloseable {
 
     private SnmpProcess snmpProcess;
     private SnmpClient snmpClient;
-    private Map<String, OIDInfo> queries;
+    private Map<String, OIDInfo> oidInfoMap;
 
     public SnmpProcessJob(SnmpProcess snmpProcess) throws IOException, LifecycleException {
         this.snmpProcess = snmpProcess;
@@ -52,7 +52,7 @@ public class SnmpProcessJob implements Runnable, AutoCloseable {
                 throw new LifecycleException("Unexpected SNMP version");
         }
 
-        this.queries = new HashMap<>();
+        this.oidInfoMap = new HashMap<>();
 
         this.snmpClient.start();
 
@@ -75,16 +75,16 @@ public class SnmpProcessJob implements Runnable, AutoCloseable {
 
                 for (String attr : query.getAttr()) {
                     OIDInfo oidInfo = new OIDInfo();
-                    if (query.getResultAlias() == null) {
-                        oidInfo.setAlias(query.getObj());
+                    if (query.getResultAlias() == null || query.getResultAlias().equals("")) {
+                        oidInfo.setAlias(query.getObj().replace('.', '_'));
                     } else {
-                        oidInfo.setAlias(query.getResultAlias());
+                        oidInfo.setAlias(query.getResultAlias().replace('.', '_'));
                     }
                     oidInfo.setName(entry.getValue());
                     oidInfo.setAttr(attr);
                     oidInfo.setAgent(agent);
 
-                    this.queries.put(new StringBuilder()
+                    this.oidInfoMap.put(new StringBuilder()
                             .append(query.getObj())
                             .append(".")
                             .append(attr)
@@ -104,12 +104,12 @@ public class SnmpProcessJob implements Runnable, AutoCloseable {
             this.snmpClient.start();
 
             List<String> oids = new ArrayList<>();
-            oids.addAll(this.queries.keySet());
+            oids.addAll(this.oidInfoMap.keySet());
             Map<String, String> results = this.snmpClient.get(oids);
             this.snmpClient.stop();
 
             for (Writer writer : this.snmpProcess.getWriters()) {
-                writer.doWrite(results, this.queries, System.currentTimeMillis());
+                writer.doWrite(results, this.oidInfoMap, System.currentTimeMillis());
             }
         } catch (IOException e) {
             logger.error(e.getMessage());

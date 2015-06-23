@@ -77,6 +77,8 @@ public class BluefloodWriter implements Writer {
                 String name = new StringBuilder()
                         .append(info.getAgent())
                         .append(".")
+                        .append(info.getAlias())
+                        .append(".")
                         .append(info.getName())
                         .append(".")
                         .append(info.getAttr())
