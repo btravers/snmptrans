@@ -37,11 +37,17 @@ public class ScheduledLoader {
 
 
     @Scheduled(fixedRate = 60000)
-    public void run() {
+    public void reloadWhenChanges() {
         if (this.snmpProcessLoader.haveChanged()) {
             this.deleteAllJobs();
             this.startupSystem();
         }
+    }
+
+    @Scheduled(cron = "0 0 * * * *")
+    public void reloadDaily() {
+        this.deleteAllJobs();
+        this.startupSystem();
     }
 
     private void startupSystem() {

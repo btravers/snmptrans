@@ -1,25 +1,16 @@
 package com.zenika.snmptrans.model;
 
-import com.google.common.collect.ImmutableMap;
 import com.zenika.snmptrans.AppConfig;
 import com.zenika.snmptrans.model.output.GraphiteWriter;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.ByteArrayOutputStream;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.common.collect.ImmutableList.of;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = AppConfig.class)

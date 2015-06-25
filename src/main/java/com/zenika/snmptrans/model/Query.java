@@ -6,7 +6,7 @@ public class Query {
 
     private String obj;
     private String resultAlias;
-    private Collection<String> attr;
+    private Collection<Attribute> attr;
     private String typeName;
 
     public String getObj() {
@@ -25,11 +25,11 @@ public class Query {
         this.resultAlias = resultAlias;
     }
 
-    public Collection<String> getAttr() {
+    public Collection<Attribute> getAttr() {
         return attr;
     }
 
-    public void setAttr(Collection<String> attr) {
+    public void setAttr(Collection<Attribute> attr) {
         this.attr = attr;
     }
 

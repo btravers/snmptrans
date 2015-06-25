@@ -1,5 +1,6 @@
 package com.zenika.snmptrans.snmp;
 
+import com.zenika.snmptrans.exception.LifecycleException;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
@@ -41,8 +42,8 @@ public abstract class SnmpClient {
         }
     }
 
-    public Map<String, String> snmpWalk(String oid) throws IOException {
-        Map<String, String> varBindings = new HashMap<>();
+    public Map<String, Map<String, String>> snmpWalk(String oid) throws IOException, LifecycleException {
+        Map<String, Map<String, String>> varBindings = new HashMap<>();
 
         String tmp = oid;
 
@@ -77,47 +78,33 @@ public abstract class SnmpClient {
 
                 tmp = variableBinding.getOid().toString();
                 if (tmp.startsWith(oid)) {
-                    varBindings.put(variableBinding.getOid().toString(), variableBinding.getVariable().toString());
+                    String currentOid = variableBinding.getOid().toString();
+                    String diff = currentOid.substring(oid.length()+1, currentOid.length());
+
+                    String[] splitted = diff.split("\\.");
+
+                    if (splitted.length < 2) {
+                        throw new LifecycleException("No attribute found");
+                    }
+
+                    Map<String, String> varBinding = varBindings.get(splitted[0]);
+                    if (varBinding == null) {
+                        varBinding = new HashMap<>();
+                        varBindings.put(splitted[0], varBinding);
+                    }
+
+                    String attr = "";
+                    for (int j=1; j<splitted.length; j++) {
+                        attr += splitted[j];
+                        if (j != splitted.length-1) {
+                            attr += ".";
+                        }
+                    }
+                    varBinding.put(attr, variableBinding.getVariable().toString());
                 } else {
                     return varBindings;
                 }
             }
-        }
-
-        return varBindings;
-    }
-
-    public Map<String, String> get(Collection<String> oids) throws IOException {
-        Map<String, String> varBindings = new HashMap<>();
-
-        PDU pdu = new PDU();
-        for (String oid : oids) {
-            pdu.add(new VariableBinding(new OID(oid)));
-        }
-        pdu.setType(PDU.GET);
-
-        Target target = this.getTarget();
-
-        ResponseEvent responseEvent = this.snmp.send(pdu, target, null);
-
-        if (responseEvent == null) {
-            return varBindings;
-        }
-
-        PDU response = responseEvent.getResponse();
-
-        if (response == null || response.size() == 0) {
-            return varBindings;
-        }
-
-        for (int i = 0; i < response.size(); i++) {
-            VariableBinding variableBinding = response.get(i);
-
-            if (variableBinding == null) {
-                return varBindings;
-            }
-
-            varBindings.put(variableBinding.getOid().toString(), variableBinding.getVariable().toString());
         }
 
         return varBindings;

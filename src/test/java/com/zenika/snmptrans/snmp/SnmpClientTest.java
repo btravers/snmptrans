@@ -16,13 +16,7 @@ public abstract class SnmpClientTest {
     SnmpClient snmpClient = null;
 
     @Test
-    public void getAnSnmpVariable() throws IOException, InterruptedException {
-        List<String> oids = new ArrayList<>();
-        oids.add(sysDescr);
+    public void shouldDoSnmpAnSnmpWalk() throws IOException, InterruptedException {
 
-        Map<String, String> results = snmpClient.get(oids);
-
-        assertThat(results).containsKey(sysDescr);
-        assertThat(results.get(sysDescr)).isNotNull();
     }
 }

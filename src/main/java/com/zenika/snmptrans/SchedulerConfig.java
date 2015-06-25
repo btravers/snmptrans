@@ -10,7 +10,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @EnableScheduling
 public class SchedulerConfig {
 
-    @Value("${run.period:60000}")
+    @Value("${reloadWhenChanges.period:60000}")
     private int runPeriod;
 
     @Bean

@@ -9,11 +9,27 @@
         }
       }
     },
-    "querySets": {
+    "queries": {
       "properties": {
-        "queries": {
+        "obj": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "resultAlias": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "typeName": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "attr": {
           "properties": {
-            "oid": {
+            "value": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "alias": {
               "type": "string",
               "index": "not_analyzed"
             }

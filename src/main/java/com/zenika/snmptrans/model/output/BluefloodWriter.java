@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 
 public class BluefloodWriter implements Writer {
@@ -59,7 +58,7 @@ public class BluefloodWriter implements Writer {
     }
 
     @Override
-    public void doWrite(Map<String, String> results, Map<String, OIDInfo> oidInfo, long timestamp) {
+    public void doWrite(Map<String, Map<String, Map<String, String>>> results, SnmpProcess snmpProcess, long timestamp) {
         String url = "http://" + host + ":" + port + "/v2.0/jmx/ingest";
 
         try {
@@ -68,27 +67,101 @@ public class BluefloodWriter implements Writer {
             HttpClient httpClient = httpClientBuilder.build();
             HttpPost request = new HttpPost(url);
 
+            String agent = new StringBuilder()
+                    .append(snmpProcess.getServer().getHost().replace('.', '_').replace(" ", ""))
+                    .append('_')
+                    .append(snmpProcess.getServer().getPort())
+                    .toString();
+
 
             String body = "[";
 
-            for (Map.Entry<String, String> result : results.entrySet()) {
-                OIDInfo info = oidInfo.get(result.getKey());
+            for (Query query : snmpProcess.getQueries()) {
 
                 String name = new StringBuilder()
-                        .append(info.getAgent())
+                        .append(agent)
                         .append(".")
-                        .append(info.getAlias())
-                        .append(".")
-                        .append(info.getName())
-                        .append(".")
-                        .append(info.getAttr())
                         .toString();
 
-                String line = "{ \"metricName\": \"" + name + "\", \"metricValue\": " + result.getValue() + ", \"collectionTime\": " + timestamp / 1000
-                        + ", \"ttlInSeconds\": " + this.ttl + "},";
-                body += line;
+                if (query.getResultAlias() == null) {
+                    name = new StringBuilder()
+                            .append(name)
+                            .append(query.getObj().replace(".", "_").replace(" ", ""))
+                            .append(".")
+                            .toString();
+                } else {
+                    name = new StringBuilder()
+                            .append(query.getResultAlias().replace(".", "_").replace(" ", "_"))
+                            .append(".")
+                            .toString();
+                }
 
-                logger.info("New entry: " + line);
+
+                Map<String, Map<String, String>> queryResults = results.get(query.getObj());
+
+                if (queryResults == null) {
+                    continue;
+                }
+
+                Map<String, String> nameResults = null;
+                if (query.getTypeName() != null) {
+                    nameResults = queryResults.get(query.getTypeName());
+                }
+
+                for (Attribute attr : query.getAttr()) {
+                    Map<String, String> attrResults = queryResults.get(attr.getValue());
+
+                    for (Map.Entry<String, String> attrResult : attrResults.entrySet()) {
+                        String mectricName = new StringBuilder()
+                                .append(name)
+                                .append(".")
+                                .toString();
+
+                        if (nameResults != null) {
+                            mectricName = new StringBuilder()
+                                    .append(mectricName)
+                                    .append(nameResults.get(attrResult.getKey()))
+                                    .toString();
+                        } else {
+                            mectricName = new StringBuilder()
+                                    .append(mectricName)
+                                    .append(attrResult.getKey())
+                                    .toString();
+                        }
+
+                        if (attr.getAlias() != null) {
+                            mectricName = new StringBuilder()
+                                    .append(mectricName)
+                                    .append(".")
+                                    .append(attr.getAlias().replace(".", "_").replace(" ", "_"))
+                                    .toString();
+                        } else {
+                            mectricName = new StringBuilder()
+                                    .append(mectricName)
+                                    .append(".")
+                                    .append(attr.getValue().replace(".", "_").replace(" ", ""))
+                                    .toString();
+                        }
+
+                        String line = new StringBuilder()
+                                .append("{ \"metricName\": \"")
+                                .append(mectricName)
+                                .append("\", \"metricValue\": ")
+                                .append(attrResult.getValue())
+                                .append(", \"collectionTime\": ")
+                                .append(timestamp / 1000)
+                                .append(", \"ttlInSeconds\": " + this.ttl + "},")
+                                .toString();
+
+                        logger.info("New entry: " + line);
+
+                        body = new StringBuilder()
+                                .append(body)
+                                .append(line)
+                                .toString();
+                    }
+
+                }
             }
 
             if (body.length() > 1) {
