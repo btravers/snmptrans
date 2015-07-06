@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/btravers/snmptrans.svg?branch=master)](https://travis-ci.org/btravers/snmptrans)
+
 # SNMPTRANS
 
 ## Introduction
