@@ -17,4 +17,4 @@ Build the jar using Maven:
 When running the resulting jar, some options can be overridden on the command line by doing:
 
     -Delasticsearch=HOST:PORT
-    -Drun.period=PERIOD_IN_MILLISECOND
+    -DreloadWhenChanges.period=PERIOD_IN_MILLISECOND
